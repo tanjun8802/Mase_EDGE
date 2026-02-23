@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadModel() {
         try {
-            val modelPath = assetFilePath("model.pte")
+            val modelPath = assetFilePath("smollm2_135m_q4.pte")
             module = Module(modelPath)
         } catch (e: Exception) {
             Log.e("Executor", "Error loading model", e)
@@ -39,17 +39,18 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Create a sample input tensor. 
-        // Replace with your model's actual input shape and data.
-        val inputTensor = Tensor.fromBlob(floatArrayOf(1.0f, 2.0f, 3.0f, 4.0f), longArrayOf(1, 4))
+        // Create a sample input tensor with token IDs for the LLM.
+        // In a real app, you would use a tokenizer to convert text to tokens.
+        val inputTokens = longArrayOf(1, 2, 3) // Example input tokens
+        val inputTensor = Tensor.fromBlob(inputTokens, longArrayOf(1, inputTokens.size.toLong()))
 
         try {
-            // Run inference
+            // Run inference. The method name might be different for your model.
             val outputTensor = module?.execute("forward", inputTensor)?.toTensor()
 
             // Process the output
-            val outputData = outputTensor?.dataAsFloatArray
-            Log.i("Executor", "Output: ${outputData?.joinToString()}")
+            val outputData = outputTensor?.dataAsLongArray
+            Log.i("Executor", "Output token IDs: ${outputData?.joinToString()}")
         } catch (e: Exception) {
             Log.e("Executor", "Error during inference", e)
         }
