@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadModel() {
         try {
-            val modelPath = assetFilePath("smollm2_135m_q4.pte")
+            val modelPath = assetFilePath("model.pte")
             module = Module(modelPath)
         } catch (e: Exception) {
             Log.e("Executor", "Error loading model", e)
