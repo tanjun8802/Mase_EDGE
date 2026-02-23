@@ -42,7 +42,7 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
     implementation("com.google.ai.edge.litert:litert:2.1.0")
-    implementation("org.pytorch:executorch-android:1.1")
+    implementation("org.pytorch:executorch-android:1.1.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

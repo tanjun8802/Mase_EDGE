@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.adlsproject.databinding.ActivityMainBinding
+import org.pytorch.executorch.EValue
 import org.pytorch.executorch.Module
 import org.pytorch.executorch.Tensor
 import java.io.File
@@ -21,38 +22,45 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         loadModel()
-        runInference()
+
+        binding.sendButton.setOnClickListener {
+            val prompt = binding.promptInput.text.toString()
+            runInference(prompt)
+        }
     }
 
     private fun loadModel() {
         try {
             val modelPath = assetFilePath("model.pte")
-            module = Module(modelPath)
+            module = Module.load(modelPath)
         } catch (e: Exception) {
             Log.e("Executor", "Error loading model", e)
         }
     }
 
-    private fun runInference() {
+    private fun runInference(prompt: String) {
         if (module == null) {
             Log.e("Executor", "Model not loaded")
+            binding.responseText.text = "Error: Model not loaded"
             return
         }
 
-        // Create a sample input tensor with token IDs for the LLM.
         // In a real app, you would use a tokenizer to convert text to tokens.
-        val inputTokens = longArrayOf(1, 2, 3) // Example input tokens
+        val inputTokens = longArrayOf(1, 2, 3) // Example input tokens from prompt
         val inputTensor = Tensor.fromBlob(inputTokens, longArrayOf(1, inputTokens.size.toLong()))
 
         try {
             // Run inference. The method name might be different for your model.
-            val outputTensor = module?.execute("forward", inputTensor)?.toTensor()
+            val outputTensor = module?.execute("forward", EValue.from(inputTensor))?.get(0)?.toTensor()
 
             // Process the output
             val outputData = outputTensor?.dataAsLongArray
-            Log.i("Executor", "Output token IDs: ${outputData?.joinToString()}")
+            val response = outputData?.joinToString() ?: "No response"
+            binding.responseText.text = response
+            Log.i("Executor", "Output token IDs: $response")
         } catch (e: Exception) {
             Log.e("Executor", "Error during inference", e)
+            binding.responseText.text = "Error: ${e.message}"
         }
     }
 
