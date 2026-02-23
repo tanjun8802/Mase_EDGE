@@ -1,0 +1,3 @@
+[submodule "mase"]
+	path = mase
+	url = https://github.com/tanjun8802/mase.git
