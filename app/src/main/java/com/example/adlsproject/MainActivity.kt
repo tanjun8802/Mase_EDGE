@@ -16,7 +16,6 @@ class MainActivity : AppCompatActivity(), LlmCallback {
     private var llm: LlmModule? = null
     private val isGenerating = AtomicBoolean(false)
     private val sb = StringBuilder()
-    // ← Replace these with YOUR HuggingFace URLs after the Colab export
     private val modelUrl = "https://huggingface.co/soup2k3/stories110M-executorch-06/resolve/main/stories110M_et06.pte"
     private val tokUrl   = "https://huggingface.co/soup2k3/stories110M-executorch-06/resolve/main/tokenizer.bin"
 
