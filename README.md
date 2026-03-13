@@ -26,7 +26,7 @@ Mase_EDGE/
 |-------|-----------|------------|
 | ML training & quantisation | PyTorch 2.6, MASE/chop (submodule) | `pyproject.toml` / `requirements.txt` |
 | Model export | ONNX, ExecuTorch Python tools | `pyproject.toml` / `requirements.txt` |
-| Android runtime | ExecuTorch Android 0.6.0, Kotlin, OkHttp | `app/build.gradle.kts` |
+| Android runtime | ExecuTorch Android ≥ 0.7.0, Kotlin, OkHttp | `app/build.gradle.kts` |
 
 ---
 
@@ -80,7 +80,12 @@ jupyter notebook
 
 Open the project in **Android Studio** (Hedgehog or newer) and run on a device or emulator with API level ≥ 26.
 
-The Gradle dependencies (ExecuTorch Android 0.6.0, Kotlin coroutines, OkHttp, etc.) are declared in `app/build.gradle.kts` and are resolved automatically by Gradle.
+The Gradle dependencies (ExecuTorch Android ≥ 0.7.0, Kotlin coroutines, OkHttp, etc.) are declared in `app/build.gradle.kts` and are resolved automatically by Gradle.
+
+> **⚠️ Security note:** `executorch-android:0.6.0` (and all earlier versions) contain multiple
+> critical CVEs (heap buffer overflow, integer overflow, out-of-bounds access). The Android
+> runtime dependency in `app/build.gradle.kts` **must** be updated to
+> `org.pytorch:executorch-android:0.7.0` or newer before building for production.
 
 ---
 

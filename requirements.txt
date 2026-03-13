@@ -27,11 +27,15 @@ onnxconverter-common
 
 # ------------------------------------------------------------------
 # ExecuTorch Python tools
-# Must match the Android runtime pinned in app/build.gradle.kts:
-#   implementation("org.pytorch:executorch-android:0.6.0")
+# Pinned to >=0.7.0 – versions <=0.6.0 have multiple CVEs:
+#   - Heap-based buffer overflow (patched in 0.7.0)
+#   - Integer overflow          (patched in 0.7.0)
+#   - Out-of-bounds access      (patched in 0.7.0)
+# The Android runtime in app/build.gradle.kts must also be updated
+# to org.pytorch:executorch-android:0.7.0 (or newer).
 # See: https://pytorch.org/executorch/stable/getting-started-setup.html
 # ------------------------------------------------------------------
-executorch==0.6.0
+executorch>=0.7.0
 
 # ------------------------------------------------------------------
 # Dataset & image utilities (used in python notebooks/)
