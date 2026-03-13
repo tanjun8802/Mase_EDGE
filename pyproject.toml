@@ -1,0 +1,107 @@
+[project]
+name = "mase-edge"
+version = "0.1.0"
+description = "ADLS Group 5 Project 2026 – PyTorch → ExecuTorch pipeline with Android deployment (Imperial College London)"
+readme = "README.md"
+requires-python = ">=3.11"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Core ML / training
+# ──────────────────────────────────────────────────────────────────────────────
+dependencies = [
+    # PyTorch (CPU build by default; see requirements-gpu.txt for CUDA wheels)
+    "torch==2.6.0",
+    "torchvision",
+    "torchaudio",
+
+    # ONNX export & runtime validation
+    "onnx>=1.16",
+    "onnxruntime>=1.18",
+    "onnxconverter-common",
+
+    # ExecuTorch Python tools – must match the Android runtime version used in
+    # app/build.gradle.kts (org.pytorch:executorch-android:0.6.0)
+    # Install notes: https://pytorch.org/executorch/stable/getting-started-setup.html
+    "executorch==0.6.0",
+
+    # Dataset utilities (used in ResNet18 notebook)
+    "datasets>=2.18",
+    "Pillow>=10.0",
+
+    # General utilities
+    "numpy>=1.26",
+    "matplotlib",
+    "tqdm",
+    "pyyaml",
+    "pandas",
+    "scikit-learn",
+
+    # Notebook support
+    "jupyter",
+    "ipykernel",
+    "ipython",
+
+    # MASE / chop framework is provided as a Git submodule at ./mase.
+    # Install it in editable mode AFTER initialising the submodule:
+    #   git submodule update --init --recursive
+    #   pip install -e ./mase
+    # (It is intentionally omitted from this list so that pip does not try to
+    #  fetch it from PyPI.)
+]
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Optional extras
+# ──────────────────────────────────────────────────────────────────────────────
+[project.optional-dependencies]
+# Development / testing tools
+dev = [
+    "pytest>=8",
+    "pytest-cov",
+    "black",
+    "ruff",
+    "ipdb",
+]
+
+# GPU / CUDA – install these *instead of* the CPU torch wheels above when a
+# CUDA-capable GPU is available:
+#   pip install torch==2.6.0 torchvision --index-url https://download.pytorch.org/whl/cu124
+gpu = [
+    "pycuda",
+    "nvidia-ml-py",   # pynvml
+]
+
+# Extras pulled in by the MASE quantisation pipeline
+mase-extra = [
+    "transformers>=4.51",
+    "timm",
+    "accelerate",
+    "einops",
+    "sentencepiece",
+    "optimum>=1.24",
+    "wandb",
+    "tensorboard",
+    "tensorboardx",
+    "tabulate",
+    "prettytable",
+    "colorlog",
+    "toml",
+    "GitPython",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Tool configuration
+# ──────────────────────────────────────────────────────────────────────────────
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,64 @@
+# ============================================================
+# Mase_EDGE – Python ML pipeline requirements
+# ============================================================
+# Quick-start (CPU):
+#   git submodule update --init --recursive
+#   pip install -r requirements.txt
+#   pip install -e ./mase          # install the MASE/chop submodule
+#
+# For GPU / CUDA builds of PyTorch, replace the torch lines below with:
+#   pip install torch==2.6.0 torchvision torchaudio \
+#       --index-url https://download.pytorch.org/whl/cu124
+# ============================================================
+
+# ------------------------------------------------------------------
+# PyTorch (CPU wheels – override for CUDA; see comment above)
+# ------------------------------------------------------------------
+torch==2.6.0
+torchvision
+torchaudio
+
+# ------------------------------------------------------------------
+# ONNX export & runtime
+# ------------------------------------------------------------------
+onnx>=1.16
+onnxruntime>=1.18
+onnxconverter-common
+
+# ------------------------------------------------------------------
+# ExecuTorch Python tools
+# Must match the Android runtime pinned in app/build.gradle.kts:
+#   implementation("org.pytorch:executorch-android:0.6.0")
+# See: https://pytorch.org/executorch/stable/getting-started-setup.html
+# ------------------------------------------------------------------
+executorch==0.6.0
+
+# ------------------------------------------------------------------
+# Dataset & image utilities (used in python notebooks/)
+# ------------------------------------------------------------------
+datasets>=2.18
+Pillow>=10.0
+
+# ------------------------------------------------------------------
+# General ML / data utilities
+# ------------------------------------------------------------------
+numpy>=1.26
+matplotlib
+tqdm
+pyyaml
+pandas
+scikit-learn
+
+# ------------------------------------------------------------------
+# Notebook support
+# ------------------------------------------------------------------
+jupyter
+ipykernel
+ipython
+
+# ------------------------------------------------------------------
+# MASE / chop framework  ← installed via Git submodule (see above)
+# The ./mase submodule has its own pyproject.toml listing all MASE
+# dependencies (transformers, timm, accelerate, einops, etc.).
+# Running `pip install -e ./mase` will pull them all in automatically.
+# ------------------------------------------------------------------
