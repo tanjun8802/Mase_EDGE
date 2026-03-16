@@ -5,6 +5,8 @@ import json
 
 # This script gathers device specifications via ADB and saves them to a JSON file.
 
+PHONE_SPECS_FILE = "device_specifications.json"
+
 def get_adb_output(cmd: str) -> str:
     result = subprocess.run(
         ["adb"] + cmd.split(),
@@ -13,7 +15,7 @@ def get_adb_output(cmd: str) -> str:
         check=False
     )
     print(cmd + " -> " + repr(result.stdout))
-    return result.stdout.strip()  # removes \n, \r, spaces
+    return result.stdout.strip() 
 
 
 def get_cpu_cores():
@@ -45,9 +47,9 @@ def get_ram_mb():
     return 0
 
 def get_gpu_info():
-    # e.g., via `dumpsys SurfaceFlinger` or simple GL string
+
     out = get_adb_output("shell dumpsys SurfaceFlinger | grep GLES")
-    # or use a small native helper that prints GPU vendor/renderer
+
     if "Adreno" in out:
         return "Adreno", "high"
     elif "Mali" in out:
@@ -63,7 +65,7 @@ def get_npu_hint():
     nnapi = get_adb_output("shell getprop ro.hardware.nnapi")
     if "qnn" in nnapi or "hexagon" in nnapi:
         return True, "Snapdragon NPU"
-    # ... other vendor patterns
+
     return False, "none"
 
 import re
@@ -104,13 +106,11 @@ def get_device_info():
     elif "Mali" in sf:
         gpu = "Mali"
         gpu_level = "mid"
-    # etc.
 
-    # NPU (you can extend this later)
+
     nnapi = get_adb_output("shell getprop ro.hardware.nnapi")
     has_npu = bool(nnapi.strip())
 
-    # Build your Optuna‑oriented JSON
     hw = {
         "manufacturer": build.get("MANUFACTURER"),
         "model": build.get("MODEL"),
@@ -133,6 +133,44 @@ def get_device_info():
     return hw
 
 
+def load_phone_specs(path: str = PHONE_SPECS_FILE) -> dict:
+    """Load device specs JSON from file; return dict or {}."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, "r") as f:
+        return json.load(f)
+
+
+def save_phone_specs(specs: dict, path: str = PHONE_SPECS_FILE):
+    """Save device specs JSON to file."""
+    with open(path, "w") as f:
+        json.dump(specs, f, indent=2)
+
+
+def get_hardware_for_phone() -> dict:
+    """
+    Get hardware spec for currently connected device.
+    
+    Auto detects device, queries via ADB, saves to `device_specifications.json`,
+    and always overwrites with fresh data.
+    
+    Returns:
+        dict of hardware specs
+    """
+    # Always query fresh and overwrite
+    hw = get_device_info()
+    key = f"{hw['manufacturer']}:{hw['model']}:{hw['soc_model']}"
+    
+    script_dir = os.path.dirname(__file__) if '__file__' in globals() else os.getcwd()
+    json_path = os.path.join(script_dir, PHONE_SPECS_FILE)
+    
+    specs = load_phone_specs(json_path)
+    specs[key] = hw
+    save_phone_specs(specs, json_path)
+    
+    print(f"Updated specs for {key} → {json_path}")
+    return hw
+
 
 if __name__ == "__main__":
 
@@ -142,7 +180,7 @@ if __name__ == "__main__":
         key: hw
     }
     script_dir = os.path.dirname(__file__)
-    json_path = os.path.join(script_dir, "device_specifications.json")
+    json_path = os.path.join(script_dir, PHONE_SPECS_FILE)
 
     with open(json_path, "w") as f:
         json.dump(specs, f, indent=2)
