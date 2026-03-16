@@ -1,0 +1,21 @@
+{
+  "HONOR:PTP-N49:SM8750": {
+    "manufacturer": "HONOR",
+    "model": "PTP-N49",
+    "brand": "HONOR",
+    "soc_manufacturer": "Qualcomm",
+    "soc_model": "SM8750",
+    "hardware": "qcom",
+    "cpu_cores": 8,
+    "cpu_freq_max_ghz": 3.2,
+    "ram_gb": 10.9794921875,
+    "has_gpu": true,
+    "gpu": "Adreno 830",
+    "gpu_compute_level": "high",
+    "has_npu": false,
+    "npu_type": "none",
+    "prefers_npu": false,
+    "prefers_gpu": true,
+    "prefers_cpu": false
+  }
+}
