@@ -8,15 +8,10 @@ import json
 PHONE_SPECS_FILE = "device_specifications.json"
 
 def get_adb_output(cmd: str) -> str:
-    result = subprocess.run(
-        ["adb"] + cmd.split(),
-        capture_output=True,
-        text=True,
-        check=False
-    )
-    print(cmd + " -> " + repr(result.stdout))
-    return result.stdout.strip() 
-
+    result = subprocess.run(["adb"] + cmd.split(), capture_output=True, text=True, check=False)
+    out = result.stdout
+    print(f"{cmd} -> {repr(out[:200])}...")  # Truncate for readability
+    return out.strip()
 
 def get_cpu_cores():
     # try /proc/cpuinfo first
