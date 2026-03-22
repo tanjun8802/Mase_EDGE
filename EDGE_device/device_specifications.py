@@ -54,16 +54,32 @@ def get_gpu_info():
     else:
         return "unknown", "unknown"
 
-def get_npu_hint():
-    # Check if NNAPI is enabled and HW accelerators exist
-    # or probe a small C helper / JNI
-    nnapi = get_adb_output("shell getprop ro.hardware.nnapi")
-    if "qnn" in nnapi or "hexagon" in nnapi:
-        return True, "Snapdragon NPU"
+def get_npu_info():
+    
+    nnapi_prop = get_adb_output("shell getprop ro.hardware.nnapi")
+    props = get_adb_output("shell getprop | grep -Ei 'nnapi|neural|hexagon|htp|npu'")
+    devs = get_adb_output("shell ls /dev | grep -Ei 'npu|neuron|hexagon|htp'")
 
-    return False, "none"
+    text = "\n".join([nnapi_prop, props, devs]).lower()
 
-import re
+    has_npu = False
+    npu_type = "none"
+    npu_level = "unknown"
+
+    if text:
+        has_npu = True
+        if "hexagon" in text or "htp" in text or "qnn" in text:
+            npu_type = "Qualcomm NPU / HTP"
+            npu_level = "high"
+        elif "ethosu" in text or "npu" in text:
+            npu_type = "generic NPU"
+            npu_level = "mid"
+        else:
+            npu_type = "unknown NPU"
+            npu_level = "unknown"
+
+    return has_npu, npu_type, npu_level
+
 
 def get_device_info():
     build = {}
@@ -103,8 +119,7 @@ def get_device_info():
         gpu_level = "mid"
 
 
-    nnapi = get_adb_output("shell getprop ro.hardware.nnapi")
-    has_npu = bool(nnapi.strip())
+    has_npu, npu_type, npu_level = get_npu_info()
 
     hw = {
         "manufacturer": build.get("MANUFACTURER"),
@@ -120,8 +135,9 @@ def get_device_info():
         "gpu": gpu,
         "gpu_compute_level": gpu_level,
         "has_npu": has_npu,
-        "npu_type": "Qualcomm NPU" if has_npu else "none",
-        "prefers_npu": has_npu,
+        "npu_type": npu_type,
+        "npu_level": npu_level,
+        "prefers_npu": bool(has_npu and npu_level == "high"),
         "prefers_gpu": bool(gpu and gpu_level == "high"),
         "prefers_cpu": not (has_npu or (gpu and gpu_level == "high")),
     }

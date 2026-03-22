@@ -15,3 +15,7 @@
 local.properties
 .idea
 /.idea
+/app/build
+/app/captures
+*pyc
+*__pycache__/
