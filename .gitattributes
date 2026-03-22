@@ -1,0 +1,6 @@
+# Jupyter notebooks: avoid CRLF churn on Windows
+*.ipynb text eol=lf
+
+# Optional (recommended): install nbstripout and run `nbstripout --install` in this repo
+# so outputs/metadata are stripped automatically on commit:
+#   pip install nbstripout && nbstripout --install
