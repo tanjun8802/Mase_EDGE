@@ -16,6 +16,6 @@
 4. Copy the model from temporary storage into the app's private storage:
 
 ```bash
-adb shell "run-as org.pytorch.executorchexamples.mv3 cp /data/local/tmp/<file-name>.pte files/model.pte"
+   adb shell "run-as com.image_classification_app cp /data/local/tmp/<file-name>.pte files/model.pte"
 ```
 5. Relaunch the app on your phone, select an image, and run inference.
