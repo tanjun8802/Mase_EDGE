@@ -1,14 +1,70 @@
-import os
-import subprocess
-import re
 import json
+import os
+import re
+import shutil
+import subprocess
+import sys
 
 # This script gathers device specifications via ADB and saves them to a JSON file.
 
 PHONE_SPECS_FILE = "device_specifications.json"
 
+_adb_path: str | None = None
+
+
+def get_adb_path() -> str:
+    """
+    Resolve the adb binary. Notebooks and GUI apps often inherit a minimal PATH, so
+    `adb` may be missing even when Android Studio’s SDK has it. We try PATH, then
+    ANDROID_HOME / ANDROID_SDK_ROOT, then the default macOS SDK layout.
+    """
+    global _adb_path
+    if _adb_path is not None:
+        return _adb_path
+
+    override = os.environ.get("ADB_PATH")
+    if override and os.path.isfile(override):
+        _adb_path = override
+        return override
+
+    exe = "adb.exe" if sys.platform == "win32" else "adb"
+    candidates: list[str] = []
+    for w in (shutil.which("adb"), shutil.which("adb.exe")):
+        if w and w not in candidates:
+            candidates.append(w)
+    for var in ("ANDROID_HOME", "ANDROID_SDK_ROOT"):
+        root = os.environ.get(var)
+        if root:
+            p = os.path.join(root, "platform-tools", exe)
+            if p not in candidates:
+                candidates.append(p)
+    if sys.platform == "darwin":
+        p = os.path.expanduser("~/Library/Android/sdk/platform-tools/adb")
+        if p not in candidates:
+            candidates.append(p)
+    elif sys.platform == "win32":
+        lad = os.environ.get("LOCALAPPDATA")
+        if lad:
+            p = os.path.join(lad, "Android", "Sdk", "platform-tools", "adb.exe")
+            if p not in candidates:
+                candidates.append(p)
+
+    for p in candidates:
+        if p and os.path.isfile(p):
+            _adb_path = p
+            return p
+
+    raise FileNotFoundError(
+        "adb not found. Install Android SDK Platform-Tools, then either: "
+        "add its folder to PATH (e.g. …/platform-tools), or set ANDROID_HOME or "
+        "ANDROID_SDK_ROOT to the SDK root, or set ADB_PATH to the full path to adb. "
+        "Default on macOS: ~/Library/Android/sdk/platform-tools/adb"
+    )
+
+
 def get_adb_output(cmd: str) -> str:
-    result = subprocess.run(["adb"] + cmd.split(), capture_output=True, text=True, check=False)
+    adb = get_adb_path()
+    result = subprocess.run([adb] + cmd.split(), capture_output=True, text=True, check=False)
     out = result.stdout
     print(f"{cmd} -> {repr(out[:200])}...")  # Truncate for readability
     return out.strip()
