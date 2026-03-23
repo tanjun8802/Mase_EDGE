@@ -9,6 +9,9 @@ import sys
 
 PHONE_SPECS_FILE = "device_specifications.json"
 
+# Avoid hung notebooks when adb/device blocks (e.g. ``service list`` on some OEM builds).
+_DEFAULT_ADB_TIMEOUT_SEC = float(os.environ.get("ADB_SHELL_TIMEOUT_SEC", "20"))
+
 _adb_path: str | None = None
 
 
@@ -62,11 +65,49 @@ def get_adb_path() -> str:
     )
 
 
-def get_adb_output(cmd: str) -> str:
+def get_adb_output(cmd: str, *, timeout_sec: float | None = None) -> str:
+    """Run ``adb <tokens...>`` where *cmd* is a space-separated argv tail, e.g. ``shell getprop ro.hardware``.
+
+    Do not use shell operators (``|``, ``||``, ``&&``); they are split into separate argv tokens and will not
+    run as a pipeline on the device. For that, use :func:`get_adb_sh_c`.
+
+    *timeout_sec* defaults to ``ADB_SHELL_TIMEOUT_SEC`` env (else 20s) so a stuck adb cannot hang forever.
+    """
     adb = get_adb_path()
-    result = subprocess.run([adb] + cmd.split(), capture_output=True, text=True, check=False)
+    t = _DEFAULT_ADB_TIMEOUT_SEC if timeout_sec is None else timeout_sec
+    try:
+        result = subprocess.run(
+            [adb] + cmd.split(),
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=t,
+        )
+    except subprocess.TimeoutExpired:
+        print(f"TIMEOUT ({t}s) adb {cmd}")
+        return ""
     out = result.stdout
     print(f"{cmd} -> {repr(out[:200])}...")  # Truncate for readability
+    return out.strip()
+
+
+def get_adb_sh_c(script: str, *, timeout_sec: float | None = None) -> str:
+    """Run ``adb shell sh -c '<script>'`` on the device (pipes, ``grep``, ``||``, etc. work)."""
+    adb = get_adb_path()
+    t = _DEFAULT_ADB_TIMEOUT_SEC if timeout_sec is None else timeout_sec
+    try:
+        result = subprocess.run(
+            [adb, "shell", "sh", "-c", script],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=t,
+        )
+    except subprocess.TimeoutExpired:
+        print(f"TIMEOUT ({t}s) adb shell sh -c {script[:120]!r}...")
+        return ""
+    out = (result.stdout or "") + (result.stderr or "")
+    print(f"sh -c {script[:80]!r}... -> {repr(out[:200])}...")
     return out.strip()
 
 def get_cpu_cores():
