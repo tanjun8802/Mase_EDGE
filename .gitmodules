@@ -1,0 +1,7 @@
+[submodule "mase"]
+	path = mase
+	url = https://github.com/tanjun8802/mase.git
+[submodule "android_app/executorch-examples"]
+	path = android_app/executorch-examples
+	url = https://github.com/Souparna-Mandal/executorch-examples.git
+	branch = release/1.0
