@@ -19,5 +19,5 @@ local.properties
 /app/captures
 *pyc
 *__pycache__/
-.venv
-/.venv
+.mase-env
+/.mase-env
